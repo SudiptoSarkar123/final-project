@@ -1,0 +1,72 @@
+class StaticController {
+ 
+    async loginPg(req,res) {
+        try {
+            res.render('admin/login', { title: 'Admin Login' });    
+        } catch (error) {
+            console.error('Error rendering login page:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    }
+
+
+    async adminDashboardPg(req,res){
+        try {
+            res.render('admin/AdminDash',{title:'Admin Dashboard'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+    async coachMgtPg(req,res){
+        try {
+            res.render('admin/coachMgt',{title:'Trainer Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+    async clientMgtPg(req,res){
+        try {
+            res.render('admin/clientMgt',{title:'Client Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+    async packageMgtPg(req,res){
+        try {
+            res.render('admin/packageMgt',{title:'Package Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+
+    async workoutLibraryPg(req,res){
+        try {
+            return res.render('admin/workoutLibrary',{title:'Workout Library'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+ 
+}
+
+
+module.exports = new StaticController();
