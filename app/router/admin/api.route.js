@@ -19,4 +19,8 @@ router.post('/packages/add',AdminDashController.addPackage)
 router.post('/packages/update/:id',AdminDashController.updatePackage)
 router.get('/packages/inactive/:id',AdminDashController.blockPackage)
 
+
+// router.get('/workouts',AdminDashController.allWorkouts)
+router.post('/workouts/add',AdminDashController.addWorkout)
+
 module.exports = router
