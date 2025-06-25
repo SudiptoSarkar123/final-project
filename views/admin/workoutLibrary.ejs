@@ -13,7 +13,7 @@
         /* CSS specifically for this page */
         #mediaPreview {
             max-width: 100%;
-            height: auto;
+            height: 100px;
             max-height: 200px;
             margin-top: 15px;
             border-radius: 8px;
@@ -83,26 +83,6 @@
                     </div>
                     
                     
-                    
-                    <div class="form-group">
-                        <label for="exerciseDifficulty">Difficulty</label>
-                        <select id="exerciseDifficulty" name="difficulty" required>
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                    </div>
-
-
-
-                    <div class="form-group">
-                        <label for="exerciseStatus">Status</label>
-                        <select id="exerciseStatus" name="status" required>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    
                     <div class="form-group">
                         <label for="exerciseCategory">Category</label>
                         <select id="exerciseCategory" name="category" required>
@@ -118,16 +98,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="duration">Duration</label>
-                        <input type="number" id="duration" name="duration" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="intensity">Intensity</label>
-                        <select id="intensity" name="intensity" required>
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
+                        <label for="exerciseStatus">Status</label>
+                        <select id="exerciseStatus" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
                         </select>
                     </div>
 
@@ -136,6 +110,7 @@
                         <input type="file" id="exerciseMedia" name="mediaFile" accept="video/*,image/*">
                         <small>Leave blank if you don't want to change the existing media.</small>
                     </div>
+
 
                     <!-- Media Preview Area -->
                     <div id="mediaPreviewContainer"></div>
@@ -149,6 +124,8 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 
     <script>
@@ -175,7 +152,7 @@
         // Function to load exercises using the "destroy and rebuild" pattern
         function loadExercises() {
             $.ajax({
-                url: '/admin/library',
+                url: '/api/admin/library',
                 method: 'GET',
                 dataType: 'json',
                 beforeSend: function () {
@@ -198,11 +175,11 @@
             exercises.forEach(exercise => {
                 // Create thumbnail for the table
                 let thumbnailHtml = `<img src="/images/placeholder.png" class="exercise-thumbnail">`; // A default placeholder
-                if (exercise.mediaUrl) {
-                    if (exercise.mediaType === 'video') {
-                        thumbnailHtml = `<video src="${exercise.mediaUrl}" class="exercise-thumbnail" muted></video>`;
+                if (exercise.mediaFile) {
+                 if (exercise.mediaFile && exercise.mediaFile.match(/\.(mp4|webm|ogg)$/i)) {
+                        thumbnailHtml = `<video src="${exercise.mediaFile}" class="exercise-thumbnail" muted></video>`;
                     } else {
-                        thumbnailHtml = `<img src="${exercise.mediaUrl}" class="exercise-thumbnail">`;
+                        thumbnailHtml = `<img src="${exercise.mediaFile}" class="exercise-thumbnail">`;
                     }
                 }
 
@@ -234,10 +211,9 @@
         }
         
         function handleEditExercise(exerciseId) {
-            // In a real app, you would fetch the full exercise details here
-            // For this example, we'll assume the API sends enough data in the main list
+        console.log('Editing exercise with ID:', exerciseId);
             $.ajax({
-                url: `/admin/library/${exerciseId}`, // Assuming an endpoint to get single item
+                url: `/api/admin/library/${exerciseId}`, // Assuming an endpoint to get single item
                 method: 'GET',
                 success: function(response) {
                     if(!response.success) { alert('Could not fetch exercise details.'); return; }
@@ -246,15 +222,17 @@
                     modalTitle.text('Edit Exercise');
                     $('#exerciseId').val(exercise._id);
                     $('#exerciseName').val(exercise.name);
+                    $('#exerciseDescription').val(exercise.description);
                     $('#exerciseCategory').val(exercise.category);
+                    $('#exerciseStatus').val(exercise.status);  
                     
                     // Show current media
                     mediaPreviewContainer.empty();
-                    if(exercise.mediaUrl) {
+                    if(exercise.mediaFile) {
                          if (exercise.mediaType === 'video') {
-                            mediaPreviewContainer.html(`<video src="${exercise.mediaUrl}" id="mediaPreview" controls></video>`);
+                            mediaPreviewContainer.html(`<video src="${exercise.mediaFile}" id="mediaPreview" controls></video>`);
                         } else {
-                            mediaPreviewContainer.html(`<img src="${exercise.mediaUrl}" id="mediaPreview">`);
+                            mediaPreviewContainer.html(`<img src="${exercise.mediaFile}" id="mediaPreview">`);
                         }
                     }
 
@@ -268,12 +246,31 @@
             // Simplified action using the unified endpoint logic
             if (!confirm('Are you sure you want to toggle the status of this exercise?')) return;
             $.ajax({
-                url: '/admin/library',
-                method: 'POST',
-                contentType: 'application/json', // This action can be JSON
-                data: JSON.stringify({ action: 'update_status', id: exerciseId }),
-                success: function(response) { if(response.success){ loadExercises(); } else { alert('Action failed.'); } },
-                error: () => alert('An error occurred.')
+                url: '/api/admin/library/'+exerciseId+'/block',
+                method: 'GET',
+                success: function(response) {
+                     if(response.success){
+                        Swal.fire({
+                            icon:'success',
+                            title:'Success',
+                            text:response.message,
+                            timer:1500,
+                            showConfirmButton:false
+                        })
+                        setTimeout(()=>{
+                            window.location.href = '/admin/library-management';
+                        },1500);
+                     } else { 
+                        alert('Action failed.');
+                     } },
+                error: (xhr) => {
+                    const errorMsg = xhr.responseJSON?.error || 'Something went wrong';
+                    Swal.fire({
+                        icon:'error',
+                        title:'Oops...',
+                        text:errorMsg
+                    })
+                }
             });
         }
         
@@ -287,26 +284,40 @@
             // Determine if it's an 'add' or 'update' action
             const action = exerciseId ? 'update' : 'add';
             formData.append('action', action);
-            
+                  
             $.ajax({
-                url: '/admin/library', // The single POST endpoint
+                url: '/api/admin/library/add-update', // The single POST endpoint
                 method: 'POST',
                 data: formData,
                 processData: false, // Tell jQuery not to process the data
                 contentType: false, // Tell jQuery not to set contentType
                 success: function (response) {
                     if (response.success) {
-                        alert(`Exercise ${action}ed successfully!`);
-                        hideModal();
-                        loadExercises();
-                    } else {
-                        alert('Operation failed: ' + (response.message || 'Unknown error'));
-                    }
+                        Swal.fire({
+                            icon:'success',
+                            title:'Success',
+                            text:response.message,
+                            timer:1500,
+                            showConfirmButton:false
+                        })
+                        setTimeout(()=>{
+                            window.location.href = '/admin/library-management';
+                        },1500);
+                        // alert('Exercise ' + (action === 'add' ? 'added' : 'updated') + ' successfully!'); hideLibraryModal(); loadExercises();
+                    } 
                 },
-                error: function () {
-                    alert('An error occurred. Please check the file size and type.');
+
+                error: function (xhr) {
+                    const errorMsg = xhr.responseJSON?.error || 'Something went wrong';
+                    Swal.fire({
+                        icon:'error',
+                        title:'Oops...',
+                        text:errorMsg
+                    })
+                    
                 }
             });
+                
         });
         
         // --- Live File Preview ---
@@ -326,6 +337,7 @@
         // --- Initial Load ---
         loadExercises();
     });
+    
     </script>
 </body>
 </html>

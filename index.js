@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const dbcon = require('./app/config/dbcon');
 const Admin = require('./app/model/admin');
@@ -19,6 +20,7 @@ app.set('views', './views');
 // Middleware
 app.use(cookieParser());
 app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
