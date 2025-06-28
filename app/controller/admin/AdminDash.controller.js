@@ -5,6 +5,8 @@ const Coach = require('../../model/coach')
 const Client = require('../../model/client');
 const Package = require('../../model/package');
 const Workout = require('../../model/workouts');
+const Enquiry = require('../../model/enquiry');
+const Category = require('../../model/category');
 
 class AdminController {
     async allCoaches(req, res) {
@@ -229,8 +231,8 @@ class AdminController {
     async addUpdateWorkout(req, res) {
         if (req.body.action === 'add') {
             try {
-                const { name, description, category , status } = req.body;
-                if (!name || !description || !category  || !status || !req.file) {
+                const { name, description, category, status } = req.body;
+                if (!name || !description || !category || !status || !req.file) {
                     return res.status(400).json({ error: 'All fields are required' });
                 }
                 // console.log(req.files.mediaFile[0].filename);
@@ -245,19 +247,19 @@ class AdminController {
                 return res.status(500).json({ error: 'Internal Server Error' });
             };
 
-        }else if(req.body.action === 'update') {
+        } else if (req.body.action === 'update') {
             try {
                 const workoutId = req.body.id;
-                const { name, description, category , status } = req.body;
-                
-                const updateData = { name, description, category , status };
-              if(req.file) {
-                  if (req.file.mimetype.startsWith('image/')) {
-                    updateData.mediaFile = '/uploads/photos/' + req.file.filename;
-                }else if (req.file.mimetype.startsWith('video/')) {
-                    updateData.mediaFile = '/uploads/videos/' + req.file.filename;
+                const { name, description, category, status } = req.body;
+
+                const updateData = { name, description, category, status };
+                if (req.file) {
+                    if (req.file.mimetype.startsWith('image/')) {
+                        updateData.mediaFile = '/uploads/photos/' + req.file.filename;
+                    } else if (req.file.mimetype.startsWith('video/')) {
+                        updateData.mediaFile = '/uploads/videos/' + req.file.filename;
+                    }
                 }
-              }
                 await Workout.findByIdAndUpdate(workoutId, updateData);
                 return res.status(200).json({ message: 'Workout updated successfully', success: true });
             } catch (error) {
@@ -268,38 +270,140 @@ class AdminController {
     }
 
     async getWorkoutById(req, res) {
-            try {
-                const workoutId = req.params.id;
-                const workout = await Workout.findById(workoutId);
-                if (!workout) {
-                    return res.status(404).json({ error: 'Workout not found' });
-                }
-                return res.status(200).json({
-                    data: workout,
-                    message: 'Workout fetched successfully',
-                    success: true
-                });
-            } catch (error) {
-                console.log(error);
-                res.status(500).json({ error: 'Internal Server Error' });
+        try {
+            const workoutId = req.params.id;
+            const workout = await Workout.findById(workoutId);
+            if (!workout) {
+                return res.status(404).json({ error: 'Workout not found' });
             }
+            return res.status(200).json({
+                data: workout,
+                message: 'Workout fetched successfully',
+                success: true
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    async blockWorkout(req, res) {
+        try {
+            const workoutId = req.params.id;
+            if (!workoutId) {
+                return res.status(400).json({ error: 'Workout ID is required' });
+            }
+            await Workout.findByIdAndUpdate(workoutId, { status: 'inactive' });
+            return res.status(200).json({ message: 'Workout blocked successfully', success: true });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+
+    async allEnquiries(req, res) {
+        try {
+            const enquiries = await Enquiry.find({}).sort({ receivedAt: -1 }); // Sort by receivedAt in descending order
+            res.status(200).json({
+                data: enquiries,
+                message: 'Enquiries fetched successfully',
+                success: true
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    async markEnquiryAsContacted(req, res) {
+        try {
+            const enquiryId = req.body.id;
+            if (!enquiryId) {
+                return res.status(400).json({ error: 'Enquiry ID is required' });
+            }
+            await Enquiry.findByIdAndUpdate(enquiryId, { status: 'Contacted' });
+            return res.status(200).json({ message: 'Enquiry marked as contacted', success: true });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-    async blockWorkout(req, res){
+    }
+
+    async deleteEnquiry(req, res) {
+        try {
+            const enquiryId = req.body.id;
+            if (!enquiryId) {
+                return res.status(400).json({ error: 'Enquiry ID is required' });
+            }
+            await Enquiry.findByIdAndDelete(enquiryId);
+            return res.status(200).json({ message: 'Enquiry deleted successfully', success: true });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    async allCategories(req, res) {
+        try {
+            const categories = await Category.find({});
+            res.status(200).json({
+                data: categories,
+                message: 'Categories fetched successfully',
+                success: true
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    async addOrUpdateCategory(req, res) {
+        if(req.body.action === 'add') {
             try {
-                const workoutId = req.params.id;
-                if (!workoutId) {
-                    return res.status(400).json({ error: 'Workout ID is required' });
+                const { name, type, description } = req.body;
+                if (!name || !type || !description) {
+                    return res.status(400).json({ error: 'All fields are required' });
                 }
-                await Workout.findByIdAndUpdate(workoutId, { status: 'inactive' });
-                return res.status(200).json({ message: 'Workout blocked successfully', success: true });
+                const newCategory = new Category({ name, type, description });
+                await newCategory.save();
+                return res.status(200).json({ message: 'Category added successfully', success: true });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        }else if(req.body.action === 'update') {
+            try {
+                const categoryId = req.body.id;
+                const { name, type, description } = req.body;
+                if (!categoryId || !name || !type || !description) {
+                    return res.status(400).json({ error: 'All fields are required' });
+                }
+                const updateData = { name, type, description };
+                await Category.findByIdAndUpdate(categoryId, updateData);
+                return res.status(200).json({ message: 'Category updated successfully', success: true });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        }else if(req.body.action === 'update_status') {
+            try {
+                console.log('req.body', req.body);
+                const categoryId = req.body.id;
+                if (!categoryId) {
+                    return res.status(400).json({ error: 'Category ID is required' });
+                }
+                const newStatus = req.body.status ;
+                await Category.findByIdAndUpdate(categoryId, { status: newStatus });
+                console.log(`Category ${newStatus} successfully`);
+                return res.status(200).json({ message: `Category ${newStatus} successfully`, success: true });
             } catch (error) {
                 console.log(error);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
         }
-
     }
-
+}
 
 module.exports = new AdminController();

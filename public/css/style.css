@@ -642,15 +642,15 @@
             display: inline-block;
         }
 
-        .status-active {
+        .status-active, .status-contacted {
             background-color: #10b981;
         }
 
-        .status-pending {
+        .status-pending ,.status-new {
             background-color: #f59e0b;
         }
 
-        .status-blocked {
+        .status-blocked , .status-closed {
             background-color: #ef4444;
         }
 

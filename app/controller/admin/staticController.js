@@ -65,6 +65,29 @@ class StaticController {
         }
     }
 
+    async enquiryMgtPg(req,res){
+        try {
+            res.render('admin/enquiryMgt',{title:'Enquiry Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+
+    async categoryMgtPg(req,res){
+        try {
+            res.render('admin/categoryMgt',{title:'Category Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
  
 }
 

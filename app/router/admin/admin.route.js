@@ -13,7 +13,10 @@ router.get('/package-management',StaticController.packageMgtPg)
 
 
 router.get('/library-management',StaticController.workoutLibraryPg)
+router.get('/enquiry-management',StaticController.enquiryMgtPg)
 
+
+router.get('/category-management',StaticController.categoryMgtPg)
 
 
 

@@ -26,4 +26,13 @@ router.post('/library/add-update', upload.single('mediaFile'), AdminDashControll
 router.get('/library/:id', AdminDashController.getWorkoutById)
 router.get('/library/:id/block', AdminDashController.blockWorkout)
 
+
+
+router.get('/enquiries', AdminDashController.allEnquiries);
+router.post('/enquiries/update', AdminDashController.markEnquiryAsContacted);
+router.post('/enquiries/delete', AdminDashController.deleteEnquiry);
+
+router.get('/categories', AdminDashController.allCategories);
+router.post('/categories', AdminDashController.addOrUpdateCategory);
+
 module.exports = router
