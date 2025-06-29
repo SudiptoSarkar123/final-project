@@ -86,14 +86,6 @@
                     <div class="form-group">
                         <label for="exerciseCategory">Category</label>
                         <select id="exerciseCategory" name="category" required>
-                            <option value="">Select a Category...</option>
-                            <option value="Legs">Legs</option>
-                            <option value="Chest">Chest</option>
-                            <option value="Back">Back</option>
-                            <option value="Shoulders">Shoulders</option>
-                            <option value="Arms">Arms</option>
-                            <option value="Core">Core</option>
-                            <option value="Cardio">Cardio</option>
                         </select>
                     </div>
 
@@ -132,6 +124,7 @@
     $(document).ready(function () {
         const tableElement = document.getElementById('libraryTable');
         let dataTable;
+        let allCategoriesData = [];
 
         // Modal elements
         const modalOverlay = $('#libraryModalOverlay');
@@ -148,6 +141,30 @@
         function hideModal() { modalOverlay.removeClass('show').fadeOut(200); }
         modalCloseBtn.on('click', hideModal);
         modalOverlay.on('click', function(e) { if ($(e.target).is(modalOverlay)) { hideModal(); } });
+
+        // load all categories for dropdown
+      function loadAllCategoriesForDropdowns() {
+          $.ajax({
+              url: '/api/admin/categories',
+              method: 'GET',
+              dataType: 'json',
+              success: function (response) {
+                  if (response.success){
+                    allCategoriesData = response.data;
+                    console.log(response.data);
+                    const assignCatagorySelect = $('#exerciseCategory');
+                    assignCatagorySelect.empty().append('<option value="">Select Category</option>');
+                    response.data.forEach(function (category) {
+                        assignCatagorySelect.append(`<option value="${category._id}">${category.name}</option>`);
+                    });
+                    return;
+                  }
+              },
+              error: function () {
+                  $('#libraryTable tbody').html(`<tr><td colspan="5" style="color:red;">Error loading categories.</td></tr>`);
+              }
+          })
+      }
 
         // Function to load exercises using the "destroy and rebuild" pattern
         function loadExercises() {
@@ -185,7 +202,7 @@
 
                 const statusPill = `<span class="status-pill status-${exercise.status}">${exercise.status}</span>`;
                 const actions = `<div class="action-buttons"><button class="action-btn edit-btn" data-id="${exercise._id}"><i class="fa-solid fa-pencil"></i></button><button class="action-btn block-btn" data-id="${exercise._id}"><i class="fa-solid fa-ban"></i></button></div>`;
-                const row = `<tr><td>${thumbnailHtml}</td><td>${exercise.name}</td><td>${exercise.category}</td><td>${statusPill}</td><td>${actions}</td></tr>`;
+                const row = `<tr><td>${thumbnailHtml}</td><td>${exercise.name}</td><td>${exercise.category.name}</td><td>${statusPill}</td><td>${actions}</td></tr>`;
                 tableBody.append(row);
             });
             dataTable = new simpleDatatables.DataTable(tableElement, { searchable: true, labels: { placeholder: "Search exercises..." } });
@@ -335,6 +352,7 @@
         });
 
         // --- Initial Load ---
+        loadAllCategoriesForDropdowns();
         loadExercises();
     });
     

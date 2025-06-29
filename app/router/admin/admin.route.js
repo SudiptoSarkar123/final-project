@@ -18,6 +18,10 @@ router.get('/enquiry-management',StaticController.enquiryMgtPg)
 
 router.get('/category-management',StaticController.categoryMgtPg)
 
+router.get('/recipe-management',StaticController.recipeMgtPg)
+
+router.get('/transaction-management',StaticController.transactionMgtPg)
+
 
 
 module.exports = router;

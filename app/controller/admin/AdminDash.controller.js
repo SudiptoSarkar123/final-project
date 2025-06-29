@@ -7,6 +7,7 @@ const Package = require('../../model/package');
 const Workout = require('../../model/workouts');
 const Enquiry = require('../../model/enquiry');
 const Category = require('../../model/category');
+const Recipe = require('../../model/recipe');
 
 class AdminController {
     async allCoaches(req, res) {
@@ -116,10 +117,10 @@ class AdminController {
 
             await newClient.save();
 
-            res.status(201).json({ message: 'Client added successfully', success: true })
+            return res.status(201).json({ message: 'Client added successfully', success: true })
         } catch (error) {
             console.log(error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
@@ -214,9 +215,8 @@ class AdminController {
 
     async allWorkouts(req, res) {
         try {
-            // Fetch all workouts from the database
-            const workouts = await Workout.find({});
-            // console.log(workouts);
+            // Fetch all workouts and populate the category field
+            const workouts = await Workout.find({}).populate('category');
             res.status(200).json({
                 data: workouts,
                 message: 'Workouts fetched successfully',
@@ -226,6 +226,7 @@ class AdminController {
             console.log(error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
+
     }
 
     async addUpdateWorkout(req, res) {
@@ -348,7 +349,8 @@ class AdminController {
     async allCategories(req, res) {
         try {
             const categories = await Category.find({});
-            res.status(200).json({
+            console.log('Categories:', categories);
+            return res.status(200).json({
                 data: categories,
                 message: 'Categories fetched successfully',
                 success: true
@@ -360,7 +362,7 @@ class AdminController {
     }
 
     async addOrUpdateCategory(req, res) {
-        if(req.body.action === 'add') {
+        if (req.body.action === 'add') {
             try {
                 const { name, type, description } = req.body;
                 if (!name || !type || !description) {
@@ -373,7 +375,7 @@ class AdminController {
                 console.log(error);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
-        }else if(req.body.action === 'update') {
+        } else if (req.body.action === 'update') {
             try {
                 const categoryId = req.body.id;
                 const { name, type, description } = req.body;
@@ -387,14 +389,14 @@ class AdminController {
                 console.log(error);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
-        }else if(req.body.action === 'update_status') {
+        } else if (req.body.action === 'update_status') {
             try {
                 console.log('req.body', req.body);
                 const categoryId = req.body.id;
                 if (!categoryId) {
                     return res.status(400).json({ error: 'Category ID is required' });
                 }
-                const newStatus = req.body.status ;
+                const newStatus = req.body.status;
                 await Category.findByIdAndUpdate(categoryId, { status: newStatus });
                 console.log(`Category ${newStatus} successfully`);
                 return res.status(200).json({ message: `Category ${newStatus} successfully`, success: true });
@@ -402,6 +404,64 @@ class AdminController {
                 console.log(error);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
+        }
+    }
+
+
+    async allRecipes(req, res) {
+        try {
+            const recipes = await Recipe.find({}).populate('category').sort({ createdAt: -1 });
+            // console.log('Recipes:', recipes);
+            res.status(200).json({
+                data: recipes,
+                message: 'Recipes fetched successfully',
+                success: true
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    async addUpdateDeleteRecipe(req,res){
+        try {
+            if (req.body.action === 'add') {
+                const { name, category, nutrition, ingredients, instructions } = req.body;
+                if (!name || !category || !nutrition || !ingredients || !instructions) {
+                    return res.status(400).json({ error: 'All fields are required' });
+                }
+                const newRecipe = new Recipe({ name, category, nutrition, ingredients, instructions });
+                await newRecipe.save();
+                return res.status(200).json({ message: 'Recipe added successfully', success: true });
+            } else if (req.body.action === 'update') {
+                const recipeId = req.body.id;
+                await Recipe.findByIdAndUpdate(recipeId, req.body);
+                return res.status(200).json({ message: 'Recipe updated successfully', success: true });
+            } else if (req.body.action === 'delete') {
+                const recipeId = req.body.id;
+                await Recipe.findByIdAndDelete(recipeId);
+                return res.status(200).json({ message: 'Recipe deleted successfully', success: true });
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    async getRecipeById(req, res) {
+        try {
+            const recipeId = req.params.id;
+            const recipe = await Recipe.findById(recipeId).populate('category');
+            if (!recipe) {
+                return res.status(404).json({ error: 'Recipe not found' });
+            }
+            res.status(200).json({
+                data: recipe,
+                message: 'Recipe fetched successfully',
+                success: true
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 }

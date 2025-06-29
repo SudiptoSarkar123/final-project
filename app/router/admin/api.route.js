@@ -35,4 +35,9 @@ router.post('/enquiries/delete', AdminDashController.deleteEnquiry);
 router.get('/categories', AdminDashController.allCategories);
 router.post('/categories', AdminDashController.addOrUpdateCategory);
 
+
+router.post('/recipes',AdminDashController.addUpdateDeleteRecipe)
+router.get('/recipes',AdminDashController.allRecipes)
+router.get('/recipes/:id',AdminDashController.getRecipeById)
+
 module.exports = router

@@ -88,6 +88,29 @@ class StaticController {
         }
     }
 
+
+    async recipeMgtPg(req,res){
+        try {
+            res.render('admin/recipeMgt',{title:'Recipe Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
+    async transactionMgtPg(req,res){
+        try {
+            res.render('admin/transactionMgt',{title:'Transaction Management'})
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error:'Internal Server Error'
+            })
+        }
+    }
+
  
 }
 

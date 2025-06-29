@@ -10,7 +10,8 @@ const WorkoutSchema = mongoose.Schema({
         default: 'active'
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
         required: true
     },
     mediaFile: {

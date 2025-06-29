@@ -92,6 +92,7 @@
 
     <!-- Script Libraries are correct -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 
     <script>
@@ -234,8 +235,26 @@
                     method: 'GET',
                     contentType: 'application/json',
                     data: JSON.stringify({ action: 'update_status', id: clientId, status: 'inactive' }),
-                    success: function (response) { if (response.success) { alert('Client blocked successfully!'); loadClients(); } else { alert('Failed to update client.'); } },
-                    error: function () { alert('An error occurred.'); }
+                    success: function (response) { if (response.success) {
+
+                        Swal.fire({
+                            icon:'success',
+                            title:'Success',
+                            text:response.message,
+                            
+                        })
+                        setTimeout(()=>{
+                            window.location.href = '/admin/client-management';
+                        },1500);
+                     } else { alert('Failed to update client.'); } },
+                    error: function (xhr) { 
+                        const errorMsg = xhr.responseJSON?.error || 'Something went wrong';
+                        Swal.fire({
+                            icon:'error',
+                            title:'Oops...',
+                            text:errorMsg
+                        })
+                     }
                 });
             }
 
@@ -254,10 +273,30 @@
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
-                    success: function (response) { if (response.success) { alert('Client added successfully!'); hideAddClientModal(); loadClients(); } else { alert(response.message || 'Failed to add client.'); } },
-                    error: function () { alert('Error adding client.'); }
+                    success: function (response) { 
+                        if (response.success) {
+                         Swal.fire({
+                             icon:'success',
+                             title:'Success',
+                             text:'Client added successfully.',
+                             timer:1500,
+                             showConfirmButton:false
+                         })
+                         setTimeout(()=>{
+                             window.location.href = '/admin/client-management';
+                         },1500);
+
+                         } else { alert(response.message || 'Failed to add client.'); } },
+                    error: function (xhr) { 
+                        const errorMsg = xhr.responseJSON?.error || 'Something went wrong';
+                        Swal.fire({
+                            icon:'error',
+                            title:'Oops...',
+                            text:errorMsg
+                        })
+                     }
                 });
-d            });
+            });
 
             $(document).on('submit', '#editClientForm', function (e) {
                 e.preventDefault();

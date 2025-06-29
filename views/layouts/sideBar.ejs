@@ -29,6 +29,16 @@
             <a href="/admin/library-management"><i class="fa-solid fa-book-open icon"></i> <span>Library Management</span></a>
         </li>
 
+        <!-- Category Management -->
+        <li class="<%- title.includes('Category') ? 'active' : '' %>">
+            <a href="/admin/category-management"><i class="fa-solid fa-sitemap icon"></i> <span>Category Management</span></a>
+        </li>
+
+        <!-- recipe Management -->
+        <li class="<%- title.includes('Recipe') ? 'active' : '' %>">
+            <a href="/admin/recipe-management"><i class="fa-solid fa-utensils icon"></i> <span>Recipe Management</span></a>
+        </li>
+
         <!-- Enquiry Management -->
         <li class="<%- title.includes('Enquiry') ? 'active' : '' %>">
             <a href="/admin/enquiry-management"><i class="fa-solid fa-headset icon"></i> <span>Enquiry Management</span></a>
@@ -39,10 +49,6 @@
             <a href="/admin/transaction-management"><i class="fa-solid fa-money-bill-transfer icon"></i> <span>Transaction Mgt.</span></a>
         </li>
 
-        <!-- Category Management -->
-        <li class="<%- title.includes('Category') ? 'active' : '' %>">
-            <a href="/admin/category-management"><i class="fa-solid fa-sitemap icon"></i> <span>Category Management</span></a>
-        </li>
 
         <!-- CMS Management -->
         <li class="<%- title.includes('CMS') ? 'active' : '' %>">
