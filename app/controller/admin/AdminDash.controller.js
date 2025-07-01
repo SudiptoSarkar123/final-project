@@ -8,6 +8,7 @@ const Workout = require('../../model/workouts');
 const Enquiry = require('../../model/enquiry');
 const Category = require('../../model/category');
 const Recipe = require('../../model/recipe');
+const Transaction = require('../../model/transaction');
 
 class AdminController {
     async allCoaches(req, res) {
@@ -422,7 +423,7 @@ class AdminController {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-    async addUpdateDeleteRecipe(req,res){
+    async addUpdateDeleteRecipe(req, res) {
         try {
             if (req.body.action === 'add') {
                 const { name, category, nutrition, ingredients, instructions } = req.body;
@@ -462,6 +463,30 @@ class AdminController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+
+
+    async allTransactionsByFillter(req, res) {
+        try {
+            const { startDate, endDate, coachId } = req.query;
+            const filter = {};
+
+            if (startDate) filter.createdAt = { ...filter.createdAt, $gte: new Date(startDate) };
+            if (endDate) filter.createdAt = { ...filter.createdAt, $lte: new Date(endDate) };
+            if (coachId) filter.coach = coachId;
+
+            // Populate client and coach for display
+            const transactions = await Transaction.find(filter)
+                .populate('client')
+                .populate('coach')
+                .sort({ createdAt: -1 });
+            console.log('Transactions:', transactions);
+            res.json({ success: true, data: transactions });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, error: 'Internal Server Error' });
         }
     }
 }

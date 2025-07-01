@@ -9,17 +9,17 @@ const transactionSchema = new mongoose.Schema({
     },
     client: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
+        ref: 'client',
         required: true
     },
     coach: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Coach',
+        ref: 'coach',
         required: true
     },
     package: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Package'
+        ref: 'package'
     },
     packageName: String, // Stored for easy display, in case the original package is deleted
     amount: { 
@@ -39,7 +39,7 @@ const transactionSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    paymentGateway: { // e.g., 'Stripe', 'PayPal'
+    paymentGateway: { 
         type: String,
         required: true
     },
@@ -50,5 +50,4 @@ const transactionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
-module.exports = Transaction;
+module.exports = mongoose.model('Transaction', transactionSchema);

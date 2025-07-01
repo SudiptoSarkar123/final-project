@@ -115,7 +115,7 @@
                 });
             }
 
-            function loadTransactions() {
+            function loadTransactions() { 
                 const filters = {
                     startDate: startDateInput.val(),
                     endDate: endDateInput.val(),
@@ -126,7 +126,7 @@
                 const queryString = $.param(filters);
 
                 $.ajax({
-                    url: `/admin/transactions?${queryString}`,
+                    url: `/api/admin/transactions?${queryString}`,
                     method: 'GET',
                     beforeSend: function () {
                         if (dataTable) dataTable.destroy();
